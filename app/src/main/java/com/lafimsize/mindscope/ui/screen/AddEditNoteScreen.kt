@@ -1,5 +1,7 @@
 package com.lafimsize.mindscope.ui.screen
 
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,14 +18,23 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.lafimsize.mindscope.data.model.Note
+import com.lafimsize.mindscope.util.findActivity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditNoteScreen(navController: NavController,
-                      viewModel: AddEditNoteViewModel = viewModel()) {
+                      viewModel: AddEditNoteViewModel = viewModel()
+) {
+
+    val context = LocalContext.current
+    val activity = remember { context.findActivity()}//ext fun for finding real activity from ContextWrapper
+    val mainViewModel : MainViewModel = viewModel(activity as ComponentActivity)
 
     val title by viewModel.title.collectAsState()
     val content by viewModel.content.collectAsState()
@@ -32,14 +43,22 @@ fun AddEditNoteScreen(navController: NavController,
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Yeni Not") }
+                title = { Text("New Note") }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                viewModel.saveNote {
-                    navController.popBackStack()
-                }
+
+                val note = Note(
+                    id = System.currentTimeMillis(),//will be primary key with room
+                    title = title,
+                    content = content,
+                    timestamp = System.currentTimeMillis()
+                )
+
+                mainViewModel.addNote(note)
+                navController.popBackStack()
+
             }) {
                 Text("Save")
             }

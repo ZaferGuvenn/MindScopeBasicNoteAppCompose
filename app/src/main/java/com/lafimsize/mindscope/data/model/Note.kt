@@ -2,7 +2,7 @@ package com.lafimsize.mindscope.data.model
 
 
 data class Note(
-    val id:Int,
+    val id:Long,
     val title:String,
     val content:String,
     val timestamp: Long,
